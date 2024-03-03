@@ -1,9 +1,17 @@
 from database.session import engine
+from alembic import context
+from core.config import settings 
 from database.base import Base    
 from database.models.user import User 
 from database.models.blog import Blog   
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine 
+
+config = context.config
+
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)  
+
+target_metadata = Base.metadata 
 
 url = URL.create(
     drivername="postgresql",
