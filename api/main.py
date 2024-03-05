@@ -1,6 +1,8 @@
 from fastapi import FastAPI;
 from fastapi.responses import JSONResponse; 
 from fastapi.middleware.cors import CORSMiddleware; 
+from models.links import Links, LinksSchema 
+from database.db import session 
 
 app = FastAPI() 
 
@@ -20,4 +22,19 @@ app.add_middleware(
 @app.get("/")
 def home(): 
     return{"message:" "Root Route For Url-Shorter App "}
-    
+
+
+
+
+@app.get("/links")
+def get_links():
+    links = session.query(Links)
+    return links.all()
+
+@app.post("/links/add")
+def add_link(link_data: LinksSchema):
+    link = Links(**link_data.model_dump())
+    print(link)
+    session.add(link)
+    session.commit()
+    return {"Link added": link.title}

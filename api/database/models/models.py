@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import mapped_column
-from models.base import Base 
+from sqlalchemy import Column, Integer, String 
+from sqlalchemy.orm import declarative_base
 from pydantic import BaseModel 
-from .users import User 
 
-
+Base = declarative_base() 
 
 class Links(Base): 
     __tablename__ = "links" 
@@ -12,7 +10,7 @@ class Links(Base):
     title = Column(String) 
     long_url = Column(String) 
     short_url = Column(String) 
-    user_id = mapped_column(ForeignKey(User.id))
+    user_id = Column(String ) 
 
 class LinksSchema(BaseModel): 
     title: str
@@ -23,3 +21,4 @@ class LinksSchema(BaseModel):
 class Config: 
     populate_by_name = True 
         
+
