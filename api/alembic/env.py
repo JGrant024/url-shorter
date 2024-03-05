@@ -3,12 +3,16 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from database.models.models import Base
+from models.base import Base
+from models.links import Links 
+from models.users import User
+
+
 
 from alembic import context
 
 from config import settings 
-from database.models.models import  Base, Links 
+from models.links import Links 
 
 
 # this is the Alembic Config object, which provides
