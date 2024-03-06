@@ -2,9 +2,22 @@ from fastapi import FastAPI;
 from fastapi.responses import JSONResponse; 
 from fastapi.middleware.cors import CORSMiddleware; 
 from models.links import Links, LinksSchema 
-from database.db import session 
+from database.db import engine, session 
+from models.base import Base 
+from models.users import User, UserAccountSchema, UserSchema
+from config import settings 
+from services import create_user
 
-app = FastAPI() 
+def create_tables(): 
+    Base.metadata.create_all(bind=engine) 
+
+def start_application(): 
+    app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION); 
+    create_tables()
+    return app
+
+app = start_application() 
+
 
 origins = [
     "http://localhost:*", 
@@ -38,3 +51,12 @@ def add_link(link_data: LinksSchema):
     session.add(link)
     session.commit()
     return {"Link added": link.title}
+
+@app.post("/register", response_model=UserSchema)
+def register_user(payload: UserAccountSchema): 
+    payload.hashed_password = User.hash_password(payload.hashed_password)
+    return create_user(user=payload) 
+
+
+
+    

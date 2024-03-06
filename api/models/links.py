@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from .users import User 
 
 
-
 class Links(Base): 
     __tablename__ = "links" 
     id = Column(Integer, primary_key=True) 
