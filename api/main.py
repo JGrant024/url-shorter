@@ -1,4 +1,4 @@
-from fastapi import FastAPI;
+from fastapi import FastAPI, HTTPException, status ;
 from fastapi.responses import JSONResponse; 
 from fastapi.middleware.cors import CORSMiddleware; 
 from models.links import Links, LinksSchema 
@@ -36,9 +36,6 @@ app.add_middleware(
 def home(): 
     return{"message:" "Root Route For Url-Shorter App "}
 
-
-
-
 @app.get("/links")
 def get_links():
     links = session.query(Links)
@@ -56,6 +53,29 @@ def add_link(link_data: LinksSchema):
 def register_user(payload: UserAccountSchema): 
     payload.hashed_password = User.hash_password(payload.hashed_password)
     return create_user(user=payload) 
+
+@app.post("/login")
+async def login(payload: UserAccountSchema): 
+    try: 
+        user: User = get_user(email=payload.email) 
+    except: 
+        raise HTTPException( 
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid User Credentials"
+        )
+    
+    is_validated: bool = user.validate_password(payload.hashed_password)
+
+    if not is_validated: 
+        raise HTTPException( 
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid User Credentials" 
+        )
+    return{"detail:" "Login Successful"}
+    
+
+    # Put forms on the front end to register user to login 
+    # routes for login 
+    # work on stylng use Tailwind, or CSS moduels  
+
 
 
 
