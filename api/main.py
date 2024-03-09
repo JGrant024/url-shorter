@@ -1,12 +1,20 @@
-from fastapi import FastAPI, HTTPException, status ;
+from fastapi import FastAPI, HTTPException, Depends, status, Query ;
 from fastapi.responses import JSONResponse; 
 from fastapi.middleware.cors import CORSMiddleware; 
+from sqlalchemy.exc import IntegrityError
 from models.links import Links, LinksSchema 
 from database.db import engine, session 
+from models.token import Token, TokenData, create_access_token
 from models.base import Base 
 from models.users import User, UserAccountSchema, UserSchema
 from config import settings 
-from services import create_user
+from services import create_user, get_user
+from datetime import timedelta, date
+from starlette.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 
 def create_tables(): 
     Base.metadata.create_all(bind=engine) 
@@ -62,19 +70,33 @@ async def login(payload: UserAccountSchema):
         raise HTTPException( 
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid User Credentials"
         )
-    
+    print(payload)
     is_validated: bool = user.validate_password(payload.hashed_password)
 
     if not is_validated: 
         raise HTTPException( 
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid User Credentials" 
         )
-    return{"detail:" "Login Successful"}
-    
+    access_token_expires = timedelta(minutes=120)
+    access_token = create_access_token(
+        data={"email": user.email}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
 
-    # Put forms on the front end to register user to login 
-    # routes for login 
-    # work on stylng use Tailwind, or CSS moduels  
+@app.get('/logout', status_code=200)
+def logout(token: Token = Depends(oauth2_scheme)):  
+        session.add(token)
+        session.commit()
+        return {"details:": "Logged out"}
+
+@app.get("/sendit") 
+async def redirect_to_external_url(url: str = Query(...)): 
+    link = session.query(Links).filter(Links.short_url == url).first() 
+
+    long_url = f"https://{link.long_url}"  
+
+    return RedirectResponse(long_url) 
+
 
 
 

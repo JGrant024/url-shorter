@@ -25,7 +25,9 @@ class User(Base):
         return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode() 
     
     def validate_password(self, pwd): 
-        return bcrypt.checkpw(password=pwd.encode(), hashed_password=self.hash_password.encode())
+        print("VALIDATE")
+        print(pwd)
+        return bcrypt.checkpw(password=pwd.encode(), hashed_password=self.hashed_password.encode())
     
 
 class UserBaseSchema(BaseModel): 

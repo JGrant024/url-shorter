@@ -1,54 +1,67 @@
-import { Form, redirect } from "react-router-dom";
+import { Form } from "react-router-dom";
 
 export async function action({ request }) {
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
-  const data = { email, password };
+  const LoginData = { email, password };
 
-  const url = "http://localhost:8000/login";
+  try {
+    const url = `${import.meta.env.VITE_SOURCE_URL}/Login`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(LoginData),
+    });
 
-  const loginFunction = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(data),
-  }).then((response) => response.json());
+    const statusCode = response.status;
+    const data = await response.json();
 
-  console.log("login function", loginFunction);
-  return redirect("/home");
+    const { access_token } = data;
+
+    localStorage.clear();
+    localStorage.setItem("access-token", access_token);
+    return statusCode === 200 ? true : false;
+  } catch (error) {
+    console.error("ERROR:", error);
+  }
 }
 
 const Login = () => {
   return (
-    <Form method="POST">
-      <label>
-        Email
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter E-mail Address"
-          required
-        />
-      </label>
-      <br />
-      <br />
-      <label>
-        Password
-        <input
-          type="text"
-          id="password"
-          name="password"
-          minLength="8"
-          placeholder="Enter Password"
-          required
-        />
-      </label>
-      <br />
-      <br />
-      <button type="button">Submit</button>
-    </Form>
+    <>
+      <h1>Login Form </h1>
+      <Form method="POST">
+        <label>
+          Email
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter E-mail Address"
+            required
+          />
+        </label>
+        <br />
+        <br />
+        <label>
+          Password
+          <input
+            type="text"
+            id="password"
+            name="password"
+            minLength="8"
+            placeholder="Enter Password"
+            required
+          />
+        </label>
+        <br />
+        <br />
+        <button type="submit">Submit</button>
+      </Form>
+    </>
   );
 };
 

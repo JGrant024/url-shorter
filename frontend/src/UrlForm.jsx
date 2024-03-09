@@ -12,6 +12,7 @@ export async function action({ request }) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
     body: JSON.stringify(data),
   }).then((response) => response.json());
@@ -51,6 +52,7 @@ const UrlForm = () => {
       </label>
       <br />
       <br />
+      <input type="hidden" name="shortend_url" value="" />
       <button type="button">Submit URL</button>
     </Form>
   );
